@@ -88,7 +88,20 @@ SloshingTankPressureAuxFunction::do_evaluate(
     // + 1.0;
 
     // g * integral(rho)dz
-    fieldPtr[0] = g * (int_rho1 - int_rho0);
+    if (x < -0.25 || x > 0.25) {
+      const double vof_local =
+        std::max(0.0, std::min(1.0, (z_init - (z0 - 0.5 / 64.0)) * 64.0));
+      double ih_g =
+        std::max(0.0, std::min(z1 - z_init, z1 - z0));
+      double ih_l =
+        std::max(0.0, std::min(z_init - z0, z_init - z1));
+      const double irho = 1000.0 * ih_l + 1.0 * ih_g;
+      fieldPtr[0] = g * irho;
+    } else {
+      fieldPtr[0] = g * (int_rho1 - int_rho0);
+    }
+
+    // Hard code
 
     fieldPtr += fieldSize;
     coords += spatialDimension;

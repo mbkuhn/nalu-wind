@@ -59,8 +59,14 @@ SloshingTankVOFAuxFunction::do_evaluate(
 
     const double z0 =
       water_level_ + amplitude_ * std::exp(-kappa_ * (x * x + y * y));
-    fieldPtr[0] =
-      -0.5 * (std::erf((z - z0) / interface_thickness_) + 1.0) + 1.0;
+    // Hard code fuzzy interface
+    if (x < -0.25 || x > 0.25) {
+      fieldPtr[0] =
+        std::max(0.0, std::min(1.0, (z0 - (z - 0.5 / 64.0)) * 64.0));
+    } else {
+      fieldPtr[0] =
+        -0.5 * (std::erf((z - z0) / interface_thickness_) + 1.0) + 1.0;
+    }
 
     fieldPtr += fieldSize;
     coords += spatialDimension;
