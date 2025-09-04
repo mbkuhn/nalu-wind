@@ -369,7 +369,7 @@ OpenTurbineSixDof::map_displacements_point(PointMass &point, bool updateCur)
   std::array<double, 3> new_point = {0.0, 0.0, 0.0};
   std::array<double, 3> current_point = {0.0, 0.0, 0.0};
   std::array<double, 3> new_velocity = {0.0, 0.0, 0.0};
-  std::array<double, 3> lever_arm = {0.0, 0.0, 0.0};
+  // std::array<double, 3> lever_arm = {0.0, 0.0, 0.0};
 
   stk::mesh::Selector sel(stk::mesh::selectUnion(point.moving_mesh_blocks));
   const auto& bkts = bulk_->get_buckets(stk::topology::NODE_RANK, sel);
@@ -403,16 +403,18 @@ OpenTurbineSixDof::map_displacements_point(PointMass &point, bool updateCur)
 
 
       for (int row = 0; row < 3; ++row) {
-        disp[row] = new_point[row] - modelc[row];
-        lever_arm[row] = new_point[row] - current_center_of_mass_location[row];
+        const double new_disp = new_point[row] - modelc[row];
+        new_velocity[row] = (new_disp - disp[row]) / dt_;
+        disp[row] = new_disp;
+        // lever_arm[row] = new_point[row] - current_center_of_mass_location[row];
       }
 
-      cross_product(&translation_and_rotation_velocities[3], lever_arm.data(), new_velocity.data());
+      /*cross_product(&translation_and_rotation_velocities[3], lever_arm.data(), new_velocity.data());
 
       for (int row = 0; row < 3; ++row) {
         new_velocity[row] += translation_and_rotation_velocities[row];
         meshv[row] = new_velocity[row];
-      }
+      }*/
 
       if (updateCur) {
         for (int row = 0; row < 3; ++row) {
