@@ -294,6 +294,7 @@ OpenTurbineSixDof::initialize(int restartFreqNalu, double curTime)
 void
 OpenTurbineSixDof::advance_struct_timestep(const double currentTime, const double dT)
 {
+  dt_ = dT;
   for (int ipoint = 0; ipoint < point_bodies_.size(); ++ipoint) {
     auto&& point = point_bodies_[ipoint];
     // Get number of times that model dt fits into nalu dt
