@@ -46,6 +46,7 @@ struct PointMass
   std::string output_file_name = "";
   int number_of_nonlinear_iterations = 5;
   double rho_inf{0.0};
+  double dt_preferred{1e4};
 };
 
 class OpenTurbineSixDof

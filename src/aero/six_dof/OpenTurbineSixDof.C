@@ -59,6 +59,9 @@ OpenTurbineSixDof::load_point(const YAML::Node& node)
   if (node["damping_factor"])
     new_body.rho_inf = node["damping_factor"].as<double>();
 
+  if (node["preferred_time_step"])
+    new_body.dt_preferred = node["preferred_time_step"].as<double>();
+
   for (int d = 0; d < tensor_ndim; ++d) {
     new_body.moments_of_inertia[d] = node["moments_of_inertia"][d].as<double>();    
   }
@@ -291,13 +294,19 @@ void
 OpenTurbineSixDof::advance_struct_timestep(const double currentTime, const double dT)
 {
   for (int ipoint = 0; ipoint < point_bodies_.size(); ++ipoint) {
-    auto && point = point_bodies_[ipoint];
-    point.openturbine_interface->parameters.h = dT;
-    auto converged = point.openturbine_interface->Step();
-
-    if (!converged) {
-      NaluEnv::self().naluOutputP0() << 
-        "OpenTurbine did not converge! Consider raising number_of_nonlinear_iterations for point body " << ipoint << std::endl;
+    auto&& point = point_bodies_[ipoint];
+    // Get number of times that model dt fits into nalu dt
+    const int nsubstep = std::max(1, std::ceil(dT / point.dt_preferred - 1e-8));
+    double dT_ot = dT / (double)nsubstep;
+    point.openturbine_interface->parameters.h = dT_ot;
+    for (int isubstep = 0; isubstep < nsubstep; ++isubstep) {
+      auto converged = point.openturbine_interface->Step();
+      if (!converged) {
+        NaluEnv::self().naluOutputP0()
+          << "OpenTurbine did not converge! Consider raising "
+             "number_of_nonlinear_iterations for point body "
+          << ipoint << std::endl;
+      }
     }
 
     if ((point.openturbine_interface->current_timestep_ % restart_frequency_) == 0 && NaluEnv::self().parallel_rank() == 0) {
