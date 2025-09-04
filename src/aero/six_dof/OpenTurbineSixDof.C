@@ -368,7 +368,7 @@ OpenTurbineSixDof::map_displacements_point(PointMass &point, bool updateCur)
 
   std::array<double, 3> new_point = {0.0, 0.0, 0.0};
   std::array<double, 3> current_point = {0.0, 0.0, 0.0};
-  std::array<double, 3> new_velocity = {0.0, 0.0, 0.0};
+  // std::array<double, 3> new_velocity = {0.0, 0.0, 0.0};
   // std::array<double, 3> lever_arm = {0.0, 0.0, 0.0};
 
   stk::mesh::Selector sel(stk::mesh::selectUnion(point.moving_mesh_blocks));
@@ -404,7 +404,7 @@ OpenTurbineSixDof::map_displacements_point(PointMass &point, bool updateCur)
 
       for (int row = 0; row < 3; ++row) {
         const double new_disp = new_point[row] - modelc[row];
-        new_velocity[row] = (new_disp - disp[row]) / dt_;
+        meshv[row] = (new_disp - disp[row]) / dt_;
         disp[row] = new_disp;
         // lever_arm[row] = new_point[row] - current_center_of_mass_location[row];
       }
