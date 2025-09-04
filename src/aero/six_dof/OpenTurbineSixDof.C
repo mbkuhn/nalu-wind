@@ -296,7 +296,7 @@ OpenTurbineSixDof::advance_struct_timestep(const double currentTime, const doubl
   for (int ipoint = 0; ipoint < point_bodies_.size(); ++ipoint) {
     auto&& point = point_bodies_[ipoint];
     // Get number of times that model dt fits into nalu dt
-    const int nsubstep = std::max(1, std::ceil(dT / point.dt_preferred - 1e-8));
+    const int nsubstep = std::max(1, static_cast<int>(std::ceil(dT / point.dt_preferred - 1e-8)));
     double dT_ot = dT / (double)nsubstep;
     point.openturbine_interface->parameters.h = dT_ot;
     for (int isubstep = 0; isubstep < nsubstep; ++isubstep) {
