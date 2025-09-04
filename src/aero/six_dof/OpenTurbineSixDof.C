@@ -299,8 +299,9 @@ OpenTurbineSixDof::advance_struct_timestep(const double currentTime, const doubl
     auto&& point = point_bodies_[ipoint];
     // Get number of times that model dt fits into nalu dt
     const int nsubstep = std::max(1, static_cast<int>(std::ceil(dT / point.dt_preferred - 1e-8)));
-    double dT_ot = dT / (double)nsubstep;
+    const double dT_ot = dT / (double)nsubstep;
     point.openturbine_interface->parameters.h = dT_ot;
+    const long istep0 = point.openturbine_interface->current_timestep_;
     for (int isubstep = 0; isubstep < nsubstep; ++isubstep) {
       auto converged = point.openturbine_interface->Step();
       if (!converged) {
@@ -311,6 +312,7 @@ OpenTurbineSixDof::advance_struct_timestep(const double currentTime, const doubl
       }
     }
 
+    point.openturbine_interface->current_timestep_ = istep0 + 1;
     if ((point.openturbine_interface->current_timestep_ % restart_frequency_) == 0 && NaluEnv::self().parallel_rank() == 0) {
       std::string file_name = std::to_string(ipoint) + "_" + point.restart_file_name;
       point.openturbine_interface->WriteRestart(file_name);
