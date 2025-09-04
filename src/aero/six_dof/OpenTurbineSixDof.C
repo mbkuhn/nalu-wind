@@ -163,11 +163,12 @@ OpenTurbineSixDof::setup_point(PointMass &point, const double dtNalu, std::share
   };
 
   const double damping_factor = point.rho_inf;
+  const double dt_preferred = point.dt_preferred;
   const int number_of_nonlinear_iterations = point.number_of_nonlinear_iterations;
 
   openturbine::interfaces::cfd::InterfaceInput point_to_build;
   point_to_build.gravity = gravity_;
-  point_to_build.time_step = dtNalu;
+  point_to_build.time_step = dt_preferred;
   point_to_build.max_iter = number_of_nonlinear_iterations;
   point_to_build.rho_inf = damping_factor;
   point_to_build.turbine.floating_platform.enable = true;
