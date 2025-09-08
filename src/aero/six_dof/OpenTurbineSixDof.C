@@ -301,6 +301,13 @@ OpenTurbineSixDof::advance_struct_timestep(const double currentTime, const doubl
     const int nsubstep = std::max(1, static_cast<int>(std::ceil(dT / point.dt_preferred - 1e-8)));
     const double dT_ot = dT / (double)nsubstep;
     point.openturbine_interface->parameters.h = dT_ot;
+    point.openturbine_interface->parameters.gamma_prime = point.openturbine_interface->parameters.gamma 
+        / (dT_ot * point.openturbine_interface->parameters.beta);
+    point.openturbine_interface->parameters.beta_prime = (1. - point.openturbine_interface->parameters.alpha_m)
+        / (dT_ot * dT_ot * point.openturbine_interface->parameters.beta 
+            * (1. - point.openturbine_interface->parameters.alpha_f));
+    point.openturbine_interface->parameters.conditioner = point.openturbine_interface->parameters.beta
+        * dT_ot * dT_ot;
     const long istep0 = point.openturbine_interface->current_timestep_;
     for (int isubstep = 0; isubstep < nsubstep; ++isubstep) {
       auto converged = point.openturbine_interface->Step();
